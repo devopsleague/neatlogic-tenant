@@ -31,27 +31,26 @@ import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Service
 @Transactional
-@OperationType(type = OperationTypeEnum.CREATE)
+@OperationType(type = OperationTypeEnum.OPERATE)
 public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
-    static Logger logger = LoggerFactory.getLogger(UploadFileApi.class);
+    //static Logger logger = LoggerFactory.getLogger(UploadFileApi.class);
 
 
-    @Autowired
+    @Resource
     private FileMapper fileMapper;
 
     @Override
@@ -61,7 +60,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "附件上传接口";
+        return "附件上传";
     }
 
     @Override
@@ -73,7 +72,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
             @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true),
             @Param(name = "uniqueKey", type = ApiParamType.STRING, desc = "当附件名称需要唯一时需要提供，相同uniqueKey值的附件名称不能重复")})
     @Output({@Param(explode = FileVo.class)})
-    @Description(desc = "附件上传接口")
+    @Description(desc = "附件上传")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String tenantUuid = TenantContext.get().getTenantUuid();
@@ -131,14 +130,14 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                         blackList = configObj.getJSONArray("blackList");
                         maxSize = configObj.getLongValue("maxSize");
                     }
-                    if (whiteList != null && whiteList.size() > 0) {
+                    if (CollectionUtils.isNotEmpty(whiteList)) {
                         for (int i = 0; i < whiteList.size(); i++) {
                             if (fileExt.equalsIgnoreCase(whiteList.getString(i))) {
                                 isAllowed = true;
                                 break;
                             }
                         }
-                    } else if (blackList != null && blackList.size() > 0) {
+                    } else if (CollectionUtils.isNotEmpty(blackList)) {
                         isAllowed = true;
                         for (int i = 0; i < blackList.size(); i++) {
                             if (fileExt.equalsIgnoreCase(blackList.getString(i))) {
@@ -187,7 +186,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                         return file;
                     }
                 } else {
-                    fileTypeHandler.analyze(multipartFile, paramObj);
+                    fileVo.setAnalyzedResult(fileTypeHandler.analyze(multipartFile, paramObj));
                     return fileVo;
                 }
             }
