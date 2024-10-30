@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.matrix;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.CacheControlType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.matrix.constvalue.SearchExpression;
@@ -64,6 +65,7 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
         return null;
     }
 
+    @CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
     @Input({
             @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING),
             @Param(name = "defaultValue", desc = "需要回显的数据uuid集合", type = ApiParamType.JSONARRAY),

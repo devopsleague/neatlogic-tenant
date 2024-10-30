@@ -18,6 +18,7 @@ package neatlogic.module.tenant.api.matrix;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.CacheControlType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.matrix.constvalue.SearchExpression;
@@ -69,6 +70,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         return true;
     }
 
+    @CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
     @Input({
             @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true),
             @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING),
