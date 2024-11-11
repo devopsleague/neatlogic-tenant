@@ -306,7 +306,8 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             deduplicateData(null, valueField, textField, resultList);
         } else {
             List<Map<String, JSONObject>> previousPageList = new ArrayList<>();
-            int startPage = dataVo.getCurrentPage();
+            int startNum = dataVo.getStartNum();
+            int currentPageBackup = dataVo.getCurrentPage();
             int pageSize = dataVo.getPageSize();
             int currentPage = 0;
             while (resultList.size() < pageSize) {
@@ -314,14 +315,20 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 dataVo.setCurrentPage(currentPage);
                 List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
                 deduplicateData(previousPageList, valueField, textField, list);
-                previousPageList.addAll(list);
-                if (currentPage >= startPage) {
-                    resultList.addAll(list);
+                for (Map<String, JSONObject> element : list) {
+                    previousPageList.add(element);
+                    if (previousPageList.size() > startNum) {
+                        resultList.add(element);
+                        if (resultList.size() >= pageSize) {
+                            break;
+                        }
+                    }
                 }
                 if (currentPage >= dataVo.getPageCount()) {
                     break;
                 }
             }
+            dataVo.setCurrentPage(currentPageBackup);
         }
         JSONArray dataList = new JSONArray();
         if (CollectionUtils.isNotEmpty(resultList)) {
