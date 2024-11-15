@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.mq;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -32,7 +34,6 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,10 +71,10 @@ public class SaveSubscribeApi extends PrivateApiComponentBase {
             @Param(name = "description", xss = true, type = ApiParamType.STRING, desc = "说明"),
             @Param(name = "isActive", isRequired = true, type = ApiParamType.INTEGER, desc = "是否激活"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置")})
-    @Description(desc = "保存消息队列订阅接口")
+    @Description(desc = "保存消息队列订阅")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        SubscribeVo subscribeVo = JSONObject.toJavaObject(jsonObj, SubscribeVo.class);
+        SubscribeVo subscribeVo = JSON.toJavaObject(jsonObj, SubscribeVo.class);
         subscribeVo.setError("");
         ISubscribeHandler subscribeHandler = SubscribeHandlerFactory.getHandler(subscribeVo.getClassName());
         if (subscribeHandler == null) {
@@ -87,13 +88,13 @@ public class SaveSubscribeApi extends PrivateApiComponentBase {
             if (oldSubVo == null) {
                 throw new SubscribeNotFoundException(jsonObj.getLong("id"));
             }
-            SubscribeManager.destroy(oldSubVo.getTopicName(), oldSubVo.getName());
+            SubscribeManager.destroy(oldSubVo);
             subscribeVo.setTopicName(oldSubVo.getTopicName());
             subscribeVo.setName(oldSubVo.getName());
         }
         if (subscribeVo.getIsActive().equals(1)) {
             try {
-                SubscribeManager.create(subscribeVo.getTopicName(), subscribeVo.getName(), subscribeVo.getIsDurable().equals(1), subscribeHandler);
+                SubscribeManager.create(subscribeVo, subscribeHandler);
             } catch (Exception ex) {
                 subscribeVo.setError(ex.getMessage());
             }

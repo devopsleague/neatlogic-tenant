@@ -19,6 +19,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.mq.TopicNotFoundException;
+import neatlogic.framework.mq.core.TopicFactory;
 import neatlogic.framework.mq.dao.mapper.MqTopicMapper;
 import neatlogic.framework.mq.dto.TopicVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -60,9 +62,16 @@ public class SaveTopicConfigApi extends PrivateApiComponentBase {
     @Description(desc = "term.framework.savetopic")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        TopicVo topicVo = JSONObject.toJavaObject(jsonObj, TopicVo.class);
-        mqTopicMapper.saveTopicConfig(topicVo);
-        return null;
+        String name = jsonObj.getString("name");
+        TopicVo topicVo = TopicFactory.getTopicByName(name);
+        if (topicVo != null) {
+            JSONObject config = jsonObj.getJSONObject("config");
+            topicVo.setConfig(config);
+            mqTopicMapper.saveTopicConfig(topicVo);
+            return null;
+        } else {
+            throw new TopicNotFoundException(name);
+        }
     }
 
 }

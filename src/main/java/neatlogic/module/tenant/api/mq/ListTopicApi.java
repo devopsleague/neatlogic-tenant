@@ -18,13 +18,11 @@ package neatlogic.module.tenant.api.mq;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.mq.core.TopicFactory;
 import neatlogic.framework.mq.dao.mapper.MqTopicMapper;
 import neatlogic.framework.mq.dto.TopicVo;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.apache.commons.collections4.CollectionUtils;
@@ -57,11 +55,13 @@ public class ListTopicApi extends PrivateApiComponentBase {
         return null;
     }
 
+    @Input({@Param(name = "handler", type = ApiParamType.STRING, desc = "消息队列类型")})
     @Output({@Param(explode = TopicVo[].class)})
     @Description(desc = "获取消息队列主题列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<TopicVo> topicList = TopicFactory.getTopicList();
+        String handler = jsonObj.getString("handler");
+        List<TopicVo> topicList = TopicFactory.getTopicList(handler);
         if (CollectionUtils.isNotEmpty(topicList)) {
             List<TopicVo> activeTopicList = mqTopicMapper.getTopicList();
             for (TopicVo topicVo : topicList) {

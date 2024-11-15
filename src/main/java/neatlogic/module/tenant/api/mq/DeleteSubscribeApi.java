@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.mq;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -28,7 +29,6 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +59,7 @@ public class DeleteSubscribeApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "id")})
-    @Description(desc = "删除消息队列订阅接口")
+    @Description(desc = "删除消息队列订阅")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SubscribeVo subVo = mqSubscribeMapper.getSubscribeById(jsonObj.getLong("id"));
@@ -67,7 +67,7 @@ public class DeleteSubscribeApi extends PrivateApiComponentBase {
             throw new SubscribeNotFoundException(jsonObj.getLong("id"));
         }
         mqSubscribeMapper.deleteSubscribeById(jsonObj.getLong("id"));
-        SubscribeManager.destroy(subVo.getTopicName(), subVo.getName());
+        SubscribeManager.destroy(subVo);
         return null;
     }
 

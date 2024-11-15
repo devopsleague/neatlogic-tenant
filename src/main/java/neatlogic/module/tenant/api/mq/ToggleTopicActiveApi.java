@@ -19,6 +19,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.mq.TopicNotFoundException;
+import neatlogic.framework.mq.core.TopicFactory;
 import neatlogic.framework.mq.dao.mapper.MqTopicMapper;
 import neatlogic.framework.mq.dto.TopicVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -59,9 +61,16 @@ public class ToggleTopicActiveApi extends PrivateApiComponentBase {
     @Description(desc = "term.framework.togglemqtopicisactive")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        TopicVo topicVo = JSONObject.toJavaObject(jsonObj, TopicVo.class);
-        mqTopicMapper.saveTopicIsActive(topicVo);
-        return null;
+        String name = jsonObj.getString("name");
+        TopicVo topicVo = TopicFactory.getTopicByName(name);
+        if (topicVo != null) {
+            Integer isActive = jsonObj.getInteger("isActive");
+            topicVo.setIsActive(isActive);
+            mqTopicMapper.saveTopicIsActive(topicVo);
+            return null;
+        } else {
+            throw new TopicNotFoundException(name);
+        }
     }
 
 }
