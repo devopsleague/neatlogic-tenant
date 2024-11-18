@@ -57,7 +57,7 @@ public class SearchSubscribeApi extends PrivateApiComponentBase {
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页大小")})
     @Output({@Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = SubscribeVo[].class)})
-    @Description(desc = "消息队列订阅查询接口")
+    @Description(desc = "消息队列订阅查询")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SubscribeVo subscribeVo = JSON.toJavaObject(jsonObj, SubscribeVo.class);

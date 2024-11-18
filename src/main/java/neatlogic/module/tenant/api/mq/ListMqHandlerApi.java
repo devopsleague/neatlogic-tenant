@@ -15,15 +15,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.mq;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.mq.SubscribeNotFoundException;
-import neatlogic.framework.mq.core.SubscribeManager;
-import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
-import neatlogic.framework.mq.dto.SubscribeVo;
+import neatlogic.framework.mq.core.IMqHandler;
+import neatlogic.framework.mq.core.MqHandlerFactory;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -32,24 +30,23 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @AuthAction(action = MQ_MODIFY.class)
-@OperationType(type = OperationTypeEnum.UPDATE)
-public class ToggleSubscribeActiveApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.SEARCH)
+public class ListMqHandlerApi extends PrivateApiComponentBase {
 
-    @Resource
-    private MqSubscribeMapper mqSubscribeMapper;
 
     @Override
     public String getToken() {
-        return "/mq/subscribe/toggleactive";
+        return "/mq/mqhandler/list";
     }
 
     @Override
     public String getName() {
-        return "更新消息队列订阅激活状态";
+        return "获取消息队列类型";
     }
 
     @Override
@@ -57,29 +54,27 @@ public class ToggleSubscribeActiveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "id"),
-            @Param(name = "isActive", isRequired = true, type = ApiParamType.INTEGER, desc = "是否激活")})
-    @Description(desc = "更新消息队列订阅激活状态")
+    @Input({@Param(name = "isEnable", type = ApiParamType.BOOLEAN, desc = "是否启用")})
+    @Description(desc = "获取消息队列类型")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        SubscribeVo subscribeVo = JSON.toJavaObject(jsonObj, SubscribeVo.class);
-        SubscribeVo checkVo = mqSubscribeMapper.getSubscribeById(subscribeVo.getId());
-        if (checkVo == null) {
-            throw new SubscribeNotFoundException(subscribeVo.getId());
-        }
-        checkVo.setIsActive(subscribeVo.getIsActive());
-
-        SubscribeManager.destroy(checkVo);
-        if (checkVo.getIsActive().equals(1)) {
-            try {
-                SubscribeManager.create(checkVo);
-                checkVo.setError(null);
-            } catch (Exception ex) {
-                checkVo.setError(ex.getMessage());
+        List<IMqHandler> handlerList = MqHandlerFactory.getMqHandlerList();
+        Boolean isEnable = jsonObj.getBoolean("isEnable");
+        JSONArray returnList = new JSONArray();
+        for (IMqHandler handler : handlerList) {
+            if (isEnable == null) {
+                returnList.add(new JSONObject() {{
+                    this.put("value", handler.getName());
+                    this.put("text", handler.getLabel());
+                }});
+            } else if (Objects.equals(isEnable, handler.isEnable())) {
+                returnList.add(new JSONObject() {{
+                    this.put("value", handler.getName());
+                    this.put("text", handler.getLabel());
+                }});
             }
         }
-        mqSubscribeMapper.updateSubscribe(checkVo);
-        return null;
+        return returnList;
     }
 
 }
