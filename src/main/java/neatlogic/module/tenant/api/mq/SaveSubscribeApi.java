@@ -64,7 +64,7 @@ public class SaveSubscribeApi extends PrivateApiComponentBase {
             @Param(name = "name", isRequired = true, type = ApiParamType.STRING, desc = "唯一标识"),
             @Param(name = "className", isRequired = true, type = ApiParamType.STRING, desc = "处理类名"),
             @Param(name = "topicName", isRequired = true, type = ApiParamType.STRING, desc = "主题名"),
-            @Param(name = "isDurable", isRequired = true, type = ApiParamType.INTEGER, desc = "是否持久订阅"),
+            // @Param(name = "isDurable", isRequired = true, type = ApiParamType.INTEGER, desc = "是否持久订阅"),
             @Param(name = "description", xss = true, type = ApiParamType.STRING, desc = "说明"),
             @Param(name = "isActive", isRequired = true, type = ApiParamType.INTEGER, desc = "是否激活"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置")})
