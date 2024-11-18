@@ -20,11 +20,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.mq.SubscribeHandlerNotFoundException;
 import neatlogic.framework.exception.mq.SubscribeNameIsExistsException;
 import neatlogic.framework.exception.mq.SubscribeNotFoundException;
-import neatlogic.framework.mq.core.ISubscribeHandler;
-import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.core.SubscribeManager;
 import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
 import neatlogic.framework.mq.dto.SubscribeVo;
@@ -76,10 +73,6 @@ public class SaveSubscribeApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SubscribeVo subscribeVo = JSON.toJavaObject(jsonObj, SubscribeVo.class);
         subscribeVo.setError("");
-        ISubscribeHandler subscribeHandler = SubscribeHandlerFactory.getHandler(subscribeVo.getClassName());
-        if (subscribeHandler == null) {
-            throw new SubscribeHandlerNotFoundException(subscribeVo.getClassName());
-        }
         if (mqSubscribeMapper.checkSubscribeNameIsExists(subscribeVo) > 0) {
             throw new SubscribeNameIsExistsException(subscribeVo.getName());
         }
@@ -94,7 +87,7 @@ public class SaveSubscribeApi extends PrivateApiComponentBase {
         }
         if (subscribeVo.getIsActive().equals(1)) {
             try {
-                SubscribeManager.create(subscribeVo, subscribeHandler);
+                SubscribeManager.create(subscribeVo);
             } catch (Exception ex) {
                 subscribeVo.setError(ex.getMessage());
             }

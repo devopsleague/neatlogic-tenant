@@ -20,10 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.mq.SubscribeHandlerNotFoundException;
 import neatlogic.framework.exception.mq.SubscribeNotFoundException;
-import neatlogic.framework.mq.core.ISubscribeHandler;
-import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.core.SubscribeManager;
 import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
 import neatlogic.framework.mq.dto.SubscribeVo;
@@ -74,12 +71,8 @@ public class ToggleSubscribeActiveApi extends PrivateApiComponentBase {
 
         SubscribeManager.destroy(checkVo);
         if (checkVo.getIsActive().equals(1)) {
-            ISubscribeHandler subscribeHandler = SubscribeHandlerFactory.getHandler(checkVo.getClassName());
-            if (subscribeHandler == null) {
-                throw new SubscribeHandlerNotFoundException(checkVo.getClassName());
-            }
             try {
-                SubscribeManager.create(checkVo, subscribeHandler);
+                SubscribeManager.create(checkVo);
             } catch (Exception ex) {
                 checkVo.setError(ex.getMessage());
             }
